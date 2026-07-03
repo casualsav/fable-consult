@@ -108,8 +108,10 @@ the brief looks clean.
 it's for — Fable plans better knowing the goal, not just the request) · session-only constraints
 Fable cannot discover from files (user prefs, prior decisions, scope boundaries) · file map
 (3–10 abs paths, 1-line role each) · pasted load-bearing code ≤150 lines (the
-interfaces/schemas/functions being changed, with file:line headers) · YOUR DRAFT PLAN (the
-draft check picks the mode) · 1–3 questions you are actually unsure about · the INDEPENDENCE
+interfaces/schemas/functions being changed, with file:line headers) · YOUR DRAFT PLAN, steps
+ordered highest-leverage first so the load-bearing decisions land at the top where Fable's
+scarce attention goes (the draft check picks the mode) · 1–3 questions you are actually unsure
+about · the INDEPENDENCE
 PROBE (below) — always in critique mode; dual-plan replaces it (a full independent plan makes
 the probe a redundant APPROACH, so omit it there).
 
