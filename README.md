@@ -68,10 +68,25 @@ session — so nothing is left behind.
 
 ## Requirements
 
-- **Claude Fable 5** access (the consultant agent runs `model: fable` at `effort: high`).
+- **Claude Fable 5** access (the consultant agent runs `model: fable`; effort defaults to
+  `high` and is tunable — see below).
 - **A harness that supports warm subagent-resume** (`SendMessage` to a spawned agent). The
   warm review resumes the plan agent; there is **no cold fallback**. If resume isn't available,
   `/fable` detects it at preflight and stops rather than half-running.
+
+## Tuning Fable's effort
+
+Fable's reasoning depth is set by the `effort:` frontmatter in `agents/fable-planner.md`,
+which defaults to `high`. To trade cost against depth, install with the `FABLE_EFFORT` env
+var — it's written into the installed agent's frontmatter:
+
+```
+FABLE_EFFORT=xhigh ./fable-consult/install.sh   # low | medium | high | xhigh | max
+```
+
+Re-run with a new value to change it. (One effort governs both Fable engagements — the plan
+consult and the warm-review resume — which is correct: it must stay constant across a single
+conversation, since changing effort mid-conversation invalidates the message cache.)
 
 ## What's inside
 
