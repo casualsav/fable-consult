@@ -7,7 +7,7 @@
     {
       "name": "fable-consult",
       "source": "./",
-      "description": "On-demand /consult skill — a Claude Fable 5 plan-consult plus an automatic warm diff-review on any task.",
+      "description": "On-demand /fable skill — a Claude Fable 5 plan-consult plus an automatic warm diff-review on any task.",
       "version": "0.1.0"
     }
   ]

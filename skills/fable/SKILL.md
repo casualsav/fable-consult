@@ -1,18 +1,18 @@
 ---
-name: consult
-description: Run a Claude Fable 5 plan-consult on the current task, then an automatic warm diff-review after you execute. Invoke when you want a stronger-judgment second opinion on a plan before building, plus a review of the result after. You (the driver, Opus) hold full session context and execute; Fable is a context-blind consultant you touch at most twice — one plan critique at the start, one warm review at the end. Trigger on "/consult", "consult Fable", "get a Fable plan review", or when the user wants an independent plan-and-review pass on a nontrivial change.
+name: fable
+description: Run a Claude Fable 5 plan-consult on the current task, then an automatic warm diff-review after you execute. Invoke when you want a stronger-judgment second opinion on a plan before building, plus a review of the result after. You (the driver, Opus) hold full session context and execute; Fable is a context-blind consultant you touch at most twice — one plan critique at the start, one warm review at the end. Trigger on "/fable", "consult Fable", "get a Fable plan review", or when the user wants an independent plan-and-review pass on a nontrivial change.
 ---
 
-# /consult — you drive, Fable consults
+# /fable — you drive, Fable consults
 
 You are the driver (Opus): you hold full session context, execute inline, and make every
 micro-judgment yourself. Fable 5 is a consultant with stronger judgment but ZERO session
 context — it reads only what your brief points to. It is never in the loop. Across one
-`/consult` you touch Fable exactly twice: **one plan critique** at the start and **one warm
+`/fable` you touch Fable exactly twice: **one plan critique** at the start and **one warm
 review** at the end (a resume of the same agent). Never a third touch.
 
 **Hard dependency:** the warm review resumes the plan agent via `SendMessage`. If your harness
-cannot resume a subagent, `/consult` cannot review — there is no cold fallback. The preflight
+cannot resume a subagent, `/fable` cannot review — there is no cold fallback. The preflight
 (S0.5) checks this before you spend the plan consult.
 
 ## The flow
@@ -26,7 +26,7 @@ from, and S7 needs it. Resolve every lookup yourself now (see the Lookup fence) 
 carries established facts, not questions.
 
 **S0.5 — Preflight dependencies.** Confirm warm subagent-resume (`SendMessage` to a spawned
-agent) is available. If it is NOT, tell the user `/consult` can't run without it and STOP —
+agent) is available. If it is NOT, tell the user `/fable` can't run without it and STOP —
 fail before paying for the plan consult, not at review time. Also check `TaskCreate`: unlike
 resume this one is degradable, not fatal — if it's absent, carry the owed-review checkpoint
 (S4) as an explicit item in your own running plan/notes instead of a task, and continue.
