@@ -169,3 +169,10 @@ it thus:
 Intent ambiguity is never a Fable consult — Fable has no access to the user's intent and would
 guess at 5× your rate. If the user's instruction has two readings that diverge and the wrong
 pick costs a redo, ask the USER one line, not Fable.
+
+Refusal domains are never a Fable consult either: offensive-security work (exploits, malware,
+attack tooling — even benign security-hardening tasks can trip it) and biology / life-sciences
+content hit Fable 5's safety classifiers. A refusal returns `stop_reason: refusal` and silently
+falls back to Opus 4.8 — you pay Fable's rate and get Opus, with no signal it happened. Keep
+those tasks on your own path; don't run `/fable` on them. (Same silent Fable→Opus fallback as the
+reasoning-extraction rule above — a generically-worded verdict on such a task is the tell.)
