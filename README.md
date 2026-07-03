@@ -23,23 +23,48 @@ Run `/fable` on a nontrivial task and it drives this flow:
 
 ## Install
 
+**Recommended — bare `/fable` (user-level skill):**
+
+```
+git clone https://github.com/casualsav/fable-consult
+./fable-consult/install.sh
+```
+
+This copies the skill and its three agents into your Claude config dir
+(`~/.claude`, or `$CLAUDE_CONFIG_DIR`). User skills aren't namespaced, so the
+command is exactly `/fable`. Restart / reload your session, then invoke `/fable`
+on any task.
+
+**Alternative — as a plugin (namespaced `/fable-consult:fable`):**
+
 ```
 /plugin marketplace add casualsav/fable-consult
 /plugin install fable-consult
 ```
 
-Then invoke `/fable` on any task.
+You get `/plugin`-managed updates, but Claude Code namespaces every plugin
+command, so it invokes as `/fable-consult:fable` — not bare `/fable` — and the
+workers are namespaced too (see the plugin note below). Pick this only if you
+want the managed-update path over the clean name.
 
 ## Uninstall
+
+If you used the script:
+
+```
+./fable-consult/uninstall.sh
+```
+
+If you installed the plugin:
 
 ```
 /plugin uninstall fable-consult
 /plugin marketplace remove casualsav/fable-consult
 ```
 
-That removes the skill and its three agents from the plugin cache. `/fable` writes nothing
-persistent outside the plugin — its only runtime state is an in-session task checkpoint that
-lives and dies with the session — so nothing is left behind.
+Either way, `/fable` writes nothing persistent beyond those files — its only
+runtime state is an in-session task checkpoint that lives and dies with the
+session — so nothing is left behind.
 
 ## Requirements
 
@@ -56,13 +81,20 @@ lives and dies with the session — so nothing is left behind.
 | `agents/fable-planner.md` | The Fable 5 consultant — dual-mode: plan critique, and warm review when resumed. |
 | `agents/explore.md` | Sonnet discovery worker (grounds the brief; also spawned by the consultant for its own search). |
 | `agents/verification.md` | Sonnet test/lint/build runner (returns distilled pass/fail for self-verify). |
+| `install.sh` / `uninstall.sh` | User-level install of the skill + agents into `~/.claude` (`$CLAUDE_CONFIG_DIR`), giving bare `/fable`. |
+| `.claude-plugin/` | Manifests for the alternative `/plugin` install (namespaced `/fable-consult:fable`). |
 
-## Post-install check (one-time)
+## Plugin note (only if you chose the plugin path)
 
-Plugin subagents may be **namespaced** (e.g. `fable-consult:explore` rather than bare
-`explore`). After installing, run one `/fable` on a throwaway task and confirm the discovery
-and verification workers resolve. If bare names don't resolve, qualify them in
-`agents/fable-planner.md` (its nested `explore` spawn) and in `SKILL.md`.
+The script install puts the agents at user level, where they resolve by bare name
+(`explore`, `fable-planner`, `verification`) — exactly what `SKILL.md` and
+`fable-planner.md` reference — so there's nothing to check.
+
+The **plugin** path is different: Claude Code namespaces plugin subagents (e.g.
+`fable-consult:explore`). After a plugin install, run one `/fable` on a throwaway
+task and confirm the discovery and verification workers resolve; if bare names
+don't, qualify them in `agents/fable-planner.md` (its nested `explore` spawn) and
+in `SKILL.md`. This mismatch is the main reason the script install is recommended.
 
 ## License
 
