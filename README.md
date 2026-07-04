@@ -14,13 +14,26 @@ repackaged so **you decide when to invoke it** instead of it firing automaticall
 
 Run `/fable` on a nontrivial task and it drives this flow:
 
-1. **Ground** — map the relevant code with `explore` workers (scaled to the task) and capture the project's test command.
+1. **Ground** — map the relevant code with `explorer` workers (scaled to the task) and capture the project's test command.
 2. **Preflight** — confirm your harness can resume a subagent (the hard dependency below).
 3. **Draft + draft check** — you write a short plan; a structural self-test (can you write the `REJECTED:` line?) picks *critique-my-draft*, *blind-sketch* (Fable sketches its approach before seeing your draft), or rarely *dual-plan*.
 4. **Plan consult** — Fable returns a terse coded verdict (`ENDORSE / AMEND / REPLACE`).
 5. **Execute** — you build it, logging deviations; if a Fable checkpoint or assumption fails, one warm mid-consult is allowed.
 6. **Warm review** — the *same* Fable agent is resumed to review the diff (`SHIP / FIX-THEN-SHIP / RECONSULT`).
 7. **Apply MUST-FIX, self-verify, ship** — no third consult.
+
+Three additions from the execution-layer marriage:
+
+- **Orchestrated parallel execution (S5-alt):** for a batch of independent items, the driver
+  fans out to `coder` / `engineer` / `test-writer` workers in parallel,
+  gates every result through `reviewer`, and sends the merged diff to the one warm
+  review. Speed comes from parallelism; quality holds because of the gates. Dependent chains
+  stay inline.
+- **Batch mode:** ≤3 small, vetted, non-interacting drafts share one plan consult and one
+  warm review — thinking overhead bills per engagement, so batching amortizes it.
+- **Review-only mode:** pre-approved mechanical items skip the plan consult; a cold
+  `REVIEW-ONLY` Fable engagement (or, for trivial diffs, the Opus `reviewer` at zero
+  Fable) judges the result. Tiered so no diff is double-reviewed by default.
 
 ## Install
 
@@ -31,39 +44,31 @@ git clone https://github.com/casualsav/fable-consult
 ./fable-consult/install.sh
 ```
 
-This copies the skill and its three agents into your Claude config dir
-(`~/.claude`, or `$CLAUDE_CONFIG_DIR`). User skills aren't namespaced, so the
-command is exactly `/fable`. Restart / reload your session, then invoke `/fable`
-on any task.
+This copies the skill and agents into your Claude config dir
+(`~/.claude`, or `$CLAUDE_CONFIG_DIR`). This is the manual-only package — no
+always-on layer, nothing merged into your CLAUDE.md; consults happen only when
+you type `/fable`. The installer asks two questions (env vars skip them for
+non-interactive installs):
 
-**Alternative — as a plugin (namespaced `/fable-consult:fable`):**
+1. **Fable plan-consult effort** (`FABLE_EFFORT`, recommended **high**).
+2. **Fable review effort** (`FABLE_REVIEW_EFFORT`, recommended **medium**) —
+   applied as the per-invocation override on the warm review, mid-consults, and
+   cold REVIEW-ONLY engagements.
 
-```
-/plugin marketplace add casualsav/fable-consult
-/plugin install fable-consult
-```
+Worker efforts are pinned in frontmatter (they cost speed, not Fable):
+verifier + explorer `low` · coder `medium` ·
+engineer + reviewer + test-writer `high`.
 
-You get `/plugin`-managed updates, but Claude Code namespaces every plugin
-command, so it invokes as `/fable-consult:fable` — not bare `/fable` — and the
-workers are namespaced too (see the plugin note below). Pick this only if you
-want the managed-update path over the clean name.
+User skills aren't namespaced, so the command is exactly `/fable`. Restart /
+reload your session, then invoke `/fable` on any task.
 
 ## Uninstall
-
-If you used the script:
 
 ```
 ./fable-consult/uninstall.sh
 ```
 
-If you installed the plugin:
-
-```
-/plugin uninstall fable-consult
-/plugin marketplace remove casualsav/fable-consult
-```
-
-Either way, `/fable` writes nothing persistent beyond those files — its only
+`/fable` writes nothing persistent beyond those files — its only
 runtime state is an in-session task checkpoint that lives and dies with the
 session — so nothing is left behind.
 
@@ -78,7 +83,7 @@ session — so nothing is left behind.
 ## Tuning Fable's effort
 
 Fable's reasoning depth is set by the `effort:` frontmatter in the installed
-`fable-planner` agent. `install.sh` **prompts** for it and writes your choice in —
+`oracle` agent. `install.sh` **prompts** for it and writes your choice in —
 **recommended: high** — Anthropic's own default for nontrivial work, and `/fable` only fires
 on nontrivial work; Fable at medium buys little margin over the Opus driver (Fable-low is
 comparable to Opus-xhigh). Raise to `xhigh` for a rare, capability-critical consult. One honest caveat: thinking
@@ -90,34 +95,26 @@ the biggest cost dial in the system; `medium` is the legitimate lever if usage l
 FABLE_EFFORT=high ./fable-consult/install.sh     # or set it to skip the prompt / for CI
 ```
 
-Re-run with a new value to change it. (One effort governs both Fable engagements — the plan
-consult and the warm-review resume — which is correct: it must stay constant across a single
-conversation, since changing effort mid-conversation invalidates the message cache. If you
-install via `/plugin` instead of `install.sh`, the shipped default is `high`; edit the
-agent's `effort:` frontmatter to change it.)
+Re-run with a new value to change it. (**Two efforts now govern the two engagements** —
+verified: changing effort mid-conversation does NOT invalidate the message cache. The
+frontmatter effort applies to the plan consult; the warm review and any exception mid-consult
+are resumed with a per-invocation override to `medium`, since they're bounded judgment
+against an already-vetted plan. This makes `xhigh` plan consults affordable: the deep
+thinking is spent once, not twice.)
 
 ## What's inside
 
 | File | Role |
 |---|---|
 | `skills/fable/SKILL.md` | The `/fable` flow + all the consult discipline (brief format, coded-output decoding, bindingness). |
-| `agents/fable-planner.md` | The Fable 5 consultant — dual-mode: plan critique, and warm review when resumed. |
-| `agents/explore.md` | Sonnet discovery worker (grounds the brief; also spawned by the consultant for its own search). |
-| `agents/verification.md` | Sonnet test/lint/build runner (returns distilled pass/fail for self-verify). |
+| `agents/oracle.md` | The Fable 5 consultant — dual-mode: plan critique, and warm review when resumed. |
+| `agents/explorer.md` | Sonnet discovery worker (grounds the brief; also spawned by the consultant for its own search). |
+| `agents/verifier.md` | Haiku test/lint/build runner (returns distilled pass/fail for self-verify). |
+| `agents/coder.md` | Sonnet worker: small, precisely-specced fixes. Gated by `reviewer`. |
+| `agents/engineer.md` | Opus worker: behavior-preserving structural refactors, tests-first on uncovered code. |
+| `agents/test-writer.md` | Sonnet worker: characterization/regression tests; orchestrator escalates gnarly cases to Opus. |
+| `agents/reviewer.md` | Opus read-only gate: reviews every worker diff before merge; also the zero-Fable review tier and the degraded fallback when a warm-review handle is lost. |
 | `install.sh` / `uninstall.sh` | User-level install of the skill + agents into `~/.claude` (`$CLAUDE_CONFIG_DIR`), giving bare `/fable`. |
-| `.claude-plugin/` | Manifests for the alternative `/plugin` install (namespaced `/fable-consult:fable`). |
-
-## Plugin note (only if you chose the plugin path)
-
-The script install puts the agents at user level, where they resolve by bare name
-(`explore`, `fable-planner`, `verification`) — exactly what `SKILL.md` and
-`fable-planner.md` reference — so there's nothing to check.
-
-The **plugin** path is different: Claude Code namespaces plugin subagents (e.g.
-`fable-consult:explore`). After a plugin install, run one `/fable` on a throwaway
-task and confirm the discovery and verification workers resolve; if bare names
-don't, qualify them in `agents/fable-planner.md` (its nested `explore` spawn) and
-in `SKILL.md`. This mismatch is the main reason the script install is recommended.
 
 ## License
 

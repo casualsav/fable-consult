@@ -19,10 +19,13 @@ cannot resume a subagent, `/fable` cannot review — there is no cold fallback. 
 ## The flow
 
 **S0 — Ground the brief.** Fable plans only as well as your brief. For anything beyond a
-local, self-evident change, delegate mapping to `explore` workers (scale it: skip for a
+local, self-evident change, delegate mapping to `explorer` workers (scale it: skip for a
 one-file change, fan out several for a subsystem consult) and fold their CONCLUSIONS — not
-raw dumps — into the brief. Capture the project's **test / verify command** and RUN it once
-(inline or via `verification`): the brief must state the baseline (`BASELINE: green`, or the
+raw dumps — into the brief. When the mapping is destined for a consult brief, instruct
+`explorer` to return NEUTRAL fact-maps (interfaces, call paths, invariants, line refs), not
+recommendations — Opus-flavored conclusions re-anchor the exact frame blind-sketch exists to
+avoid. Capture the project's **test / verify command** and RUN it once
+(inline or via `verifier`): the brief must state the baseline (`BASELINE: green`, or the
 red facts) so Fable never plans against a false premise, and S7 needs the command. Resolve
 every lookup yourself now (Lookup fence, below) so the brief carries established facts, not
 questions.
@@ -37,11 +40,11 @@ it picks critique-your-draft, blind-sketch, or (rarely) dual-plan.
 
 **S2 — Build the plan brief** to the spec below, gated by the Lookup fence.
 
-**S3 — Spawn `fable-planner`.** One plan consult (blind-sketch mode uses two messages in the
+**S3 — Spawn `oracle`.** One plan consult (blind-sketch mode uses two messages in the
 same engagement). Decode the coded verdict against the table below; apply per Bindingness.
 
 **S4 — Register the owed warm review as a self-contained task item.** `TaskCreate` a
-checkpoint that survives the execution turns. It MUST embed: the **`fable-planner` agent
+checkpoint that survives the execution turns. It MUST embed: the **`oracle` agent
 id/handle** (from S3's spawn result), a pointer to the **warm review brief spec** (below),
 and the precondition — **fire only after execution AND verification evidence are complete**.
 
@@ -52,15 +55,32 @@ once — send only the failed item + the observed facts; it rules on holding vs 
 affected steps. This is the only permitted mid-task touch; never resume for reassurance or a
 partial-diff review (half-built code reads as false positives).
 
-**S6 — Warm review.** When the S4 precondition is met, resume the SAME `fable-planner` agent
-with the warm review brief. **Resume-failure path:** if the handle is gone (session restart,
+**S5-alt — Orchestrated parallel execution (multi-item batches).** When the accepted plan is
+a batch of INDEPENDENT items, don't execute inline: fan out to workers in parallel —
+`coder` (Sonnet) for small specced fixes, `engineer` (Opus) for
+structural work, `test-writer` FIRST wherever touched code lacks coverage. Write each worker
+a self-contained spec (files, functions, problem, intended change, verification). Give
+file-disjoint assignments, or set `isolation: worktree` on the workers if they must overlap.
+Gate EVERY worker result through `reviewer` before merging — you read verdicts, never
+raw diffs; REJECT means re-delegate with a tighter spec, not a fix-it argument with the
+worker. The merged diff then gets the single S6 warm review as normal. Keep DEPENDENT chains
+inline: spawn overhead and lost shared context make sequential delegation slower than driving
+it yourself, and speed is the only reason this alt exists.
+
+**S6 — Warm review.** When the S4 precondition is met, resume the SAME `oracle` agent
+with the warm review brief, **overriding effort down to `medium` per-invocation** (verified:
+changing effort mid-conversation does not break the message cache). The review is bounded
+judgment on a diff against an already-vetted plan — the open-ended reasoning was paid for at
+plan effort. The S5 exception mid-consult takes the same `medium` override. **Resume-failure path:** if the handle is gone (session restart,
 compaction), DISCLOSE to the user that the owed review can't be fulfilled and why. Do NOT
 substitute a fresh Fable spawn — a cold spawn violates warm-only and re-bills the context the
-resume was meant to reuse. Ship with the gap disclosed, or let the user decide.
+resume was meant to reuse. **Degraded fallback:** spawn the Opus `reviewer` worker on the
+diff + task spec and disclose the downgrade — a reviewed ship at Opus judgment beats an
+unreviewed one. Ship with the gap disclosed, or let the user decide.
 
 **S7 — Apply MUST-FIX, self-verify, ship.** For each MUST-FIX: diff the fixed lines against
 the item, confirm the fix addresses it, run the narrowest test that exercises it (inline, or
-`verification`). Ship on green. No post-fix Fable touch — a MUST-FIX that genuinely can't be
+`verifier`). Ship on green. No post-fix Fable touch — a MUST-FIX that genuinely can't be
 made to pass is disclosed to the user, not sent back to Fable.
 
 ## The draft check — decision or first idea? (zero Fable, picks the mode)
@@ -87,31 +107,37 @@ first-idea step still critiques — name that step in your questions so Fable we
 
 ## Building the brief — this is where a consult lives or dies
 Transfer conclusions, not context. Fable reads pointed-to files (≤8 reads) and delegates
-search to a Sonnet `explore` child, so point, don't dump — EXCEPT the load-bearing core,
+search to a Sonnet `explorer` child, so point, don't dump — EXCEPT the load-bearing core,
 which you paste.
 
 **Lookup fence — run before the consult.** Scan the brief for any clause that is discovery /
 lookup / "verify / check the docs" rather than judgment: Fable is never for finding facts.
-Resolve each yourself (inline, or `explore`) and replace it with the answer. Structural, not
+Resolve each yourself (inline, or `explorer`) and replace it with the answer. Structural, not
 felt: run it even when the brief looks clean.
 
-**Plan brief** (target ≤2.5k tokens), in this order — goal first, bulk in the middle, the
+**Plan brief** (target ≤3.5k tokens — input is Fable's cheap channel; spend it on evidence,
+never on hints of approach), in this order — goal first, bulk in the middle, the
 ask at the end:
 1. INTENT — one line: the larger goal, why it matters, who it's for. Fable plans better
    knowing the goal, not just the request.
 2. Task verbatim.
 3. Session-only constraints Fable cannot discover from files (user prefs, prior decisions,
-   scope boundaries) + `BASELINE:` from S0.
-4. File map — 3–10 abs paths, 1-line role each.
+   scope boundaries) + `BASELINE:` from S0 + `DONE-MEANS:` — 2–5 observable acceptance
+   criteria and invariants (tests that must stay green, behaviors preserved). Fully specify
+   the WHAT; carry zero HOW — this section is the biggest accuracy lever in the brief.
+4. File map — 3–10 abs paths, 1-line role each — plus a raw skeleton (≤40-line tree of the
+   relevant dirs, uninterpreted) and `PRIOR ART:` — patterns this repo already uses for this
+   kind of change, stated factually, not as recommendation.
 5. Pasted load-bearing code ≤150 lines (the interfaces/schemas/functions being changed, with
    file:line headers).
 6. `REJECTED: <alt> — <reason>` (from the draft check).
 7. YOUR DRAFT PLAN, opened with "my draft view, for you to critique or replace".
-   (Blind-sketch: omit 6–7 from message one; send them in the follow-up.)
+   (Blind-sketch: omit 6–8 from message one — your questions are born from the draft and
+   telegraph its shape, anchoring the sketch; send 6–8 together in the follow-up.)
 8. 1–3 questions you are actually unsure about, then the bare marker `PROBE` — the agent
    prompt defines it (would Fable take a materially different approach?); don't restate it.
 
-**Warm review brief** (resumed `fable-planner`; target ≤1.5k tokens + diff): ONLY what is new
+**Warm review brief** (resumed `oracle`; target ≤1.5k tokens + diff): ONLY what is new
 since planning — deviations log · the diff (full if ≤400 lines; else --stat + risky hunks in
 full) · verification evidence (command → result, one line each) · 1–3 concerns. No stance
 line (the agent prompt carries review stance); never re-send the plan, file map, or pasted
@@ -119,6 +145,27 @@ code — the agent holds them, and re-sending is the waste warm mode exists to a
 
 A brief missing the draft plan (in critique mode) or the session constraints is a wasted
 consult — Fable will return generic advice worth less than your own judgment.
+
+## Batch mode (≤3 small related items)
+Thinking bills at output rate per ENGAGEMENT, so N tiny consults pay that overhead N times.
+When several small items share a subsystem and EVERY draft passes the draft check (a
+first-idea item gets its own consult — blind-sketch doesn't batch), send ONE plan brief
+carrying T1/T2/T3 blocks: each block = task verbatim, its REJECTED line, its draft (≤6
+lines). Shared file map, constraints, and pasted code appear once. Fable's findings reference
+`T#S#`; one VERDICT line per task. Execute all (S5 or S5-alt), then ONE warm review over the
+combined diff — deviations and hunks labeled by T#. Never batch items that interact: a
+cross-item flaw needs one plan, not a batch.
+
+## Review-only mode (mechanical, pre-approved items)
+For items where a plan consult buys nothing — dead-code removal, renames, dependency bumps
+you've already decided — skip the consult machinery: execute (or delegate to a worker), then
+spawn `oracle` COLD with a review-only brief: task spec, diff, verification evidence,
+and the literal marker `REVIEW-ONLY`. Warm-only doesn't apply — there is no planning context
+to reuse. Effort override `medium`. Returns the normal SHIP / FIX-THEN-SHIP block. Cheaper
+still: route genuinely trivial diffs to the Opus `reviewer` worker and spend zero Fable.
+The tiering, so the same diff is never double-reviewed by default: trivial → `reviewer`
+only; mechanical-but-worth-Fable → review-only; anything that got a plan consult → warm
+review only.
 
 ## Reading Fable's coded output
 Fable replies in a coded, exception-based format because its OUTPUT bills at 5× its input
