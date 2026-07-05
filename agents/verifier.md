@@ -1,6 +1,6 @@
 ---
 name: verifier
-description: Sonnet test/lint/build runner. Delegate any verification whose raw output the driver would otherwise scroll inline. Give it exact commands plus what "pass" means; it returns pass/fail and distilled failures.
+description: Haiku test/lint/build runner. Delegate any verification whose raw output the driver would otherwise scroll inline. Give it exact commands plus what "pass" means; it returns pass/fail and distilled failures.
 model: haiku
 effort: low
 tools: Bash, Read, Grep, Glob

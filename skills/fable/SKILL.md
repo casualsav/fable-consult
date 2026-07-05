@@ -67,8 +67,12 @@ structural work and spec'd feature builds, `test-writer` FIRST wherever touched 
 coverage. If the batch needed a fresh audit, fan that out too: parallel read-only `explorer`
 passes, each owning a slice small enough to read IN FULL — precise findings (file:line,
 evidence) are what make delegation briefs good; vague specs make workers improvise. Write
-each worker a self-contained spec: the files it OWNS (touch nothing else), the problem, the
-intended change, exact verify commands. **One writer per file, ever** — sequence anything
+each worker a self-contained spec in four parts — delegation quality IS spec quality:
+(1) **FACTS** — the audit findings it needs, file:line, PASTED in (workers verify drift,
+never re-discover); (2) **OWNERSHIP + change** — the files it OWNS (touch nothing else),
+the problem, the intended design; (3) **DECIDED** — design decisions already made and why,
+so the worker implements instead of relitigating; (4) **HAZARDS + VERIFY** — known edge
+cases to check and the exact verify commands. **One writer per file, ever** — sequence anything
 that shares a file, or set `isolation: worktree` when ownership can't be split cleanly.
 **Hub-file batching:** when the batch's items all funnel through one hub file (a monolith
 daemon, a central router), don't serialize workers through it — give ONE worker a
@@ -80,12 +84,17 @@ edits); you stage and commit between batches, and `git add` new files before any
 that syncs tracked files. **Review cadence:** workers that ran in PARALLEL (worktrees or
 disjoint files) each gate through `reviewer` before you merge them; a SERIAL batch in one
 tree takes ONE `reviewer` pass over the combined diff at the end — same coverage, fewer
-spawns. Either way you read verdicts, never raw diffs, with ONE exception: personally read
+spawns. Tiny mechanical diffs (template-following, ≲30 lines, no new logic) skip the
+`reviewer` spawn entirely: the lead reads the diff directly — faster than the spawn, and
+the same first-hand eyes the user-facing rule already demands.
+Either way you read verdicts, never raw diffs, with ONE exception: personally read
 the diff of any NEW user-facing behavior first-hand regardless of verdict. Delegate
 regression breadth, never novelty. Treat each worker report's **Concerns** section as
 review agenda, not commentary — feed every named hazard to the `reviewer`/`smoke-tester`
-pass or rule on it yourself; workers self-flag exactly what specs miss. REJECT means
-re-delegate with a tighter spec, not a fix-it argument with the
+pass or rule on it yourself; workers self-flag exactly what specs miss. **Amendments to a
+worker's own diff resume the SAME worker** (`SendMessage` to its agent id) — its context is
+warm and the turnaround is seconds; a fresh spawn re-pays the full read. REJECT is
+different: re-delegate with a tighter spec, not a fix-it argument with the
 worker. The merged diff then gets the single S6 warm review as normal. Keep DEPENDENT chains
 inline: spawn overhead and lost shared context make sequential delegation slower than driving
 it yourself, and speed is the only reason this alt exists. (In long multi-phase sessions,

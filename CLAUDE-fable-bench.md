@@ -15,11 +15,15 @@ judgment. A typed `/fable` = run its draft discipline yourself, gate via
   funnel through one hub file go to ONE worker as a multi-item spec, never
   serial workers) → parallel `coder`/`engineer`, `test-writer` first on
   uncovered code → `reviewer`: per-worker only when workers ran in parallel,
-  else ONE pass on the FULL combined diff, cross-batch interactions included
-  (personally read the diff of any NEW user-facing behavior — delegate
-  regression breadth, never novelty; worker-report **Concerns** are review
-  agenda, not commentary) → `smoke-tester` against the live system when
-  runtime behavior changed → ship.
+  else ONE pass on the FULL combined diff, cross-batch interactions included;
+  tiny template-following diffs (≲30 lines, no new logic) skip the spawn —
+  read them yourself (personally read the diff of any NEW user-facing
+  behavior — delegate regression breadth, never novelty; worker-report
+  **Concerns** are review agenda, not commentary) → `smoke-tester` against
+  the live system when runtime behavior changed → ship.
+- Amendments to a worker's own diff: resume the SAME worker via SendMessage
+  (warm context, seconds); a fresh spawn re-pays the full read. REJECT still
+  means re-delegate with a tighter spec.
 - You own git; workers never run git write commands.
 - Full execution mechanics: Read `skills/fable/SKILL.md` S5-alt once per
   session and follow it.
