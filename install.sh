@@ -38,8 +38,9 @@ case " $EFFORTS " in *" $REVIEW_EFFORT "*) ;; *) echo "FABLE_REVIEW_EFFORT must 
 
 mkdir -p "$CLAUDE/skills" "$CLAUDE/agents"
 
-rm -rf "$CLAUDE/skills/fable"
+rm -rf "$CLAUDE/skills/fable" "$CLAUDE/skills/fable-method"
 cp -a "$SRC/skills/fable" "$CLAUDE/skills/fable"
+cp -a "$SRC/skills/fable-method" "$CLAUDE/skills/fable-method"
 
 for a in explorer fable-planner verifier coder engineer test-writer reviewer smoke-tester; do
   cp -a "$SRC/agents/$a.md" "$CLAUDE/agents/$a.md"

@@ -139,6 +139,7 @@ shipped default is `high`; edit the agent's `effort:` frontmatter to change it.)
 | File | Role |
 |---|---|
 | `skills/fable/SKILL.md` | The `/fable` flow + all the consult discipline (brief format, coded-output decoding, bindingness). |
+| `skills/fable-method/SKILL.md` | Fable’s working method distilled for the Opus driver — decomposition, self-verification, next-action selection. Load at the start of any nontrivial task. |
 | `agents/fable-planner.md` | The Fable 5 consultant — dual-mode: plan critique, and warm review when resumed. |
 | `agents/explorer.md` | Sonnet discovery worker (grounds the brief; also spawned by the consultant for its own search). |
 | `agents/verifier.md` | Haiku test/lint/build runner (returns distilled pass/fail for self-verify). |
