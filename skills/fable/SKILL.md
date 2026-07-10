@@ -13,13 +13,21 @@ the end (a resume of the same agent) — plus at most one exception-triggered mi
 (S5). Never a scheduled third touch. **MODEL GATE:** if this session's
 driving model is itself Fable-tier, never spawn `fable-planner` — you ARE the
 consultant, and a spawn pays twice for the same judgment. `/fable` then means:
-run S1 and the draft check on yourself, execute per S5/S5-alt, take the review
-gate via `reviewer` (effort high) plus `smoke-tester` when runtime behavior
-changed. All Fable-touch budgets read as zero.
+run S1 and the draft check on yourself, execute per S5/S5-alt, review the
+diff YOURSELF (S5-alt's `reviewer` spawns don't apply — a Fable lead reads
+worker diffs first-hand), plus `smoke-tester` when runtime behavior changed.
+All Fable-touch budgets read as zero.
 
 **Hard dependency:** the warm review resumes the plan agent via `SendMessage`. If your harness
 cannot resume a subagent, `/fable` cannot review — there is no cold fallback. The preflight
 (S0.5) checks this before you spend the plan consult.
+
+**Native advisor first:** when `advisorModel: fable` is set (as on this install), a below-Fable driver
+already has Fable judgment on tap mid-task — the advisor reads the FULL conversation
+server-side, no brief needed. For an ad-hoc second opinion, prefer asking for an advisor
+consult over invoking this skill. `/fable` remains the right tool when you want the full
+discipline: a structured plan-consult against a draft you must defend, plus the owed warm
+diff-review at the end.
 
 ## The flow
 
@@ -62,7 +70,7 @@ partial-diff review (half-built code reads as false positives).
 
 **S5-alt — Orchestrated parallel execution (multi-item batches).** When the accepted plan is
 a batch of INDEPENDENT items, don't execute inline: fan out to workers in parallel —
-`coder` (Sonnet) for small specced fixes, `engineer` (Opus) for
+`coder` (Sonnet) for small specced fixes, `engineer` (Sonnet) for
 structural work and spec'd feature builds, `test-writer` FIRST wherever touched code lacks
 coverage. If the batch needed a fresh audit, fan that out too: parallel read-only `explorer`
 passes, each owning a slice small enough to read IN FULL — precise findings (file:line,
@@ -81,7 +89,9 @@ touches.
 **You own git:** workers never run git write commands (`stash`, `checkout --`, `reset`,
 `clean`, commit, push — a bare stash in a shared tree destroys other workers' in-flight
 edits); you stage and commit between batches, and `git add` new files before any deploy step
-that syncs tracked files. **Review cadence:** workers that ran in PARALLEL (worktrees or
+that syncs tracked files. **Review cadence (Opus driver only — a Fable-tier
+lead never spawns `reviewer`; it reads every worker diff itself, per the MODEL
+GATE):** workers that ran in PARALLEL (worktrees or
 disjoint files) each gate through `reviewer` before you merge them; a SERIAL batch in one
 tree takes ONE `reviewer` pass over the combined diff at the end — same coverage, fewer
 spawns. Tiny mechanical diffs (template-following, ≲30 lines, no new logic) skip the
@@ -108,8 +118,8 @@ judgment on a diff against an already-vetted plan — the open-ended reasoning w
 plan effort. The S5 exception mid-consult takes the same `medium` override. **Resume-failure path:** if the handle is gone (session restart,
 compaction), DISCLOSE to the user that the owed review can't be fulfilled and why. Do NOT
 substitute a fresh Fable spawn — a cold spawn violates warm-only and re-bills the context the
-resume was meant to reuse. **Degraded fallback:** spawn the Opus `reviewer` worker on the
-diff + task spec and disclose the downgrade — a reviewed ship at Opus judgment beats an
+resume was meant to reuse. **Degraded fallback:** spawn the `reviewer` worker (Sonnet) on the
+diff + task spec and disclose the downgrade — a reviewed ship beats an
 unreviewed one. Ship with the gap disclosed, or let the user decide.
 
 **S7 — Apply MUST-FIX, self-verify, ship.** For each MUST-FIX: diff the fixed lines against
@@ -199,7 +209,7 @@ you've already decided — skip the consult machinery: execute (or delegate to a
 spawn `fable-planner` COLD with a review-only brief: task spec, diff, verification evidence,
 and the literal marker `REVIEW-ONLY`. Warm-only doesn't apply — there is no planning context
 to reuse. Effort override `medium`. Returns the normal SHIP / FIX-THEN-SHIP block. Cheaper
-still: route genuinely trivial diffs to the Opus `reviewer` worker and spend zero Fable.
+still: route genuinely trivial diffs to the Sonnet `reviewer` worker and spend zero Fable.
 The tiering, so the same diff is never double-reviewed by default: trivial → `reviewer`
 only; mechanical-but-worth-Fable → review-only; anything that got a plan consult → warm
 review only.

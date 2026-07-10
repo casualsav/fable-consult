@@ -42,7 +42,7 @@ Three additions from the execution-layer marriage:
 - **Batch mode:** ≤3 small, vetted, non-interacting drafts share one plan consult and one
   warm review — thinking overhead bills per engagement, so batching amortizes it.
 - **Review-only mode:** pre-approved mechanical items skip the plan consult; a cold
-  `REVIEW-ONLY` Fable engagement (or, for trivial diffs, the Opus `reviewer` at zero
+  `REVIEW-ONLY` Fable engagement (or, for trivial diffs, the Sonnet `reviewer` at zero
   Fable) judges the result. Tiered so no diff is double-reviewed by default.
 
 ## Install
@@ -144,9 +144,9 @@ shipped default is `high`; edit the agent's `effort:` frontmatter to change it.)
 | `agents/explorer.md` | Sonnet discovery worker (grounds the brief; also spawned by the consultant for its own search). |
 | `agents/verifier.md` | Haiku test/lint/build runner (returns distilled pass/fail for self-verify). |
 | `agents/coder.md` | Sonnet worker: small, precisely-specced fixes. Gated by `reviewer`. |
-| `agents/engineer.md` | Opus worker: behavior-preserving structural refactors, tests-first on uncovered code. |
-| `agents/test-writer.md` | Sonnet worker: characterization/regression tests; orchestrator escalates gnarly cases to Opus. |
-| `agents/reviewer.md` | Opus read-only gate: reviews every worker diff before merge; also the zero-Fable review tier and the degraded fallback when a warm-review handle is lost. |
+| `agents/engineer.md` | Sonnet worker: behavior-preserving structural refactors, tests-first on uncovered code. |
+| `agents/test-writer.md` | Sonnet worker: characterization/regression tests; orchestrator escalates gnarly cases with a spawn-time model/effort override. |
+| `agents/reviewer.md` | Sonnet read-only gate: reviews worker diffs under a below-Fable driver (a Fable lead reads diffs itself); also the zero-Fable review tier and the degraded fallback when a warm-review handle is lost. |
 | `agents/smoke-tester.md` | Sonnet live prober: drives the real running app end-to-end post-deploy — green unit tests are not the finish line. |
 | `install.sh` / `uninstall.sh` | User-level install of the skill + agents into `~/.claude` (`$CLAUDE_CONFIG_DIR`), giving bare `/fable`. |
 | `.claude-plugin/` | Manifests for the alternative `/plugin` install (namespaced `/fable-bench:fable`). |
