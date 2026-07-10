@@ -13,11 +13,11 @@ variant — no auto layer; consults are always on-demand):
 The installed CLAUDE.md block is ~24 lines and applies only to Fable-led
 sessions; below-Fable sessions ignore it and just have `/fable` available.
 
-The philosophy: **you (Opus) hold full session context and do the work.** Fable 5 has stronger
+The philosophy: **you (a below-Fable driver — Sonnet or Opus) hold full session context and do the work.** Fable 5 has stronger
 judgment but zero session context, so it's a consultant you touch twice per `/fable`
 — one plan consult before you build, one warm review of the diff after — plus at most one
 exception-triggered mid-consult if a checkpoint or assumption Fable flagged fails mid-task.
-It's the plan-and-review discipline of a heavier "Opus-drives / Fable-consults" config,
+It's the plan-and-review discipline of a heavier "driver + Fable-consultant" config,
 repackaged so **you decide when to invoke it** instead of it firing automatically.
 
 ## What it does
@@ -139,7 +139,7 @@ shipped default is `high`; edit the agent's `effort:` frontmatter to change it.)
 | File | Role |
 |---|---|
 | `skills/fable/SKILL.md` | The `/fable` flow + all the consult discipline (brief format, coded-output decoding, bindingness). |
-| `skills/fable-method/SKILL.md` | Fable’s working method distilled for the Opus driver — decomposition, self-verification, next-action selection. Load at the start of any nontrivial task. |
+| `skills/fable-method/SKILL.md` | Fable’s working method distilled for the below-Fable driver — decomposition, self-verification, next-action selection. Load at the start of any nontrivial task. |
 | `agents/fable-planner.md` | The Fable 5 consultant — dual-mode: plan critique, and warm review when resumed. |
 | `agents/explorer.md` | Sonnet discovery worker (grounds the brief; also spawned by the consultant for its own search). |
 | `agents/verifier.md` | Haiku test/lint/build runner (returns distilled pass/fail for self-verify). |

@@ -1,11 +1,11 @@
 ---
 name: fable
-description: Run a Claude Fable 5 plan-consult on the current task, then an automatic warm diff-review after you execute. Invoke when you want a stronger-judgment second opinion on a plan before building, plus a review of the result after. You (the driver, Opus) hold full session context and execute; Fable is a context-blind consultant — one plan consult at the start, one warm review at the end. Trigger on "/fable", "consult Fable", "get a Fable plan review", or when the user wants an independent plan-and-review pass on a nontrivial change.
+description: Run a Claude Fable 5 plan-consult on the current task, then an automatic warm diff-review after you execute. Invoke when you want a stronger-judgment second opinion on a plan before building, plus a review of the result after. You (the below-Fable driver — Sonnet or Opus) hold full session context and execute; Fable is a context-blind consultant — one plan consult at the start, one warm review at the end. Trigger on "/fable", "consult Fable", "get a Fable plan review", or when the user wants an independent plan-and-review pass on a nontrivial change.
 ---
 
 # /fable — you drive, Fable consults
 
-You are the driver (Opus): you hold full session context, execute inline, and make every
+You are the driver (below-Fable — Sonnet or Opus): you hold full session context, execute inline, and make every
 micro-judgment yourself. Fable 5 is a consultant with stronger judgment but ZERO session
 context — it reads only what your brief points to. It is never in the loop. Across one
 `/fable` you touch Fable twice — **one plan consult** at the start, **one warm review** at
@@ -36,7 +36,7 @@ local, self-evident change, delegate mapping to `explorer` workers (scale it: sk
 one-file change, fan out several for a subsystem consult) and fold their CONCLUSIONS — not
 raw dumps — into the brief. When the mapping is destined for a consult brief, instruct
 `explorer` to return NEUTRAL fact-maps (interfaces, call paths, invariants, line refs), not
-recommendations — Opus-flavored conclusions re-anchor the exact frame blind-sketch exists to
+recommendations — driver-flavored conclusions re-anchor the exact frame blind-sketch exists to
 avoid. Capture the project's **test / verify command** and RUN it once
 (inline or via `verifier`): the brief must state the baseline (`BASELINE: green`, or the
 red facts) so Fable never plans against a false premise, and S7 needs the command. Resolve
@@ -89,7 +89,7 @@ touches.
 **You own git:** workers never run git write commands (`stash`, `checkout --`, `reset`,
 `clean`, commit, push — a bare stash in a shared tree destroys other workers' in-flight
 edits); you stage and commit between batches, and `git add` new files before any deploy step
-that syncs tracked files. **Review cadence (Opus driver only — a Fable-tier
+that syncs tracked files. **Review cadence (below-Fable driver only — a Fable-tier
 lead never spawns `reviewer`; it reads every worker diff itself, per the MODEL
 GATE):** workers that ran in PARALLEL (worktrees or
 disjoint files) each gate through `reviewer` before you merge them; a SERIAL batch in one

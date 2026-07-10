@@ -1,7 +1,7 @@
 ---
 name: fable-method
 description: >-
-  Fable 5's working method, distilled for Opus: how to decompose a hard task,
+  Fable 5's working method, distilled for below-Fable drivers: how to decompose a hard task,
   verify your own work, and pick the next action. Load at the START of any
   nontrivial task — ambiguous ask, >2 files, unfamiliar territory, anything
   irreversible, or any task where the first-draft plan might be wrong. Skip
