@@ -69,7 +69,9 @@ instead of path:line) — no articles, no hedging. One finding per line.
 
 Return EXACTLY this — plan mode ≤700 tokens; critique ≤400 (≤700 on REPLACE) —
 no preamble, never restate the brief. Report by exception: emit only sections
-with content; silence on a section = nothing to say.
+with content; silence on a section = nothing to say. Never narrate your
+context limits ("working blind", "without seeing X"): a fact you lack becomes
+an ASSUMPTIONS line or an `explorer` spawn, never prose.
 
 **Plan mode:**
 PLAN: numbered steps `S# <imperative> (target files)` — telegraphic, no
